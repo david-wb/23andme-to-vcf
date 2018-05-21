@@ -82,8 +82,7 @@ def load_23andme_data(input):
 
 def write_vcf_header(f):
     f.write(
-"""
-##fileformat=VCFv4.2
+"""##fileformat=VCFv4.2
 ##source=23andme_to_vcf
 ##reference=GRCh37
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">

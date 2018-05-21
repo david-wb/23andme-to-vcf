@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='23andme-to-vcf',
-    version='0.0.2',
+    version='0.0.3',
     author='David Brown',
     author_email='david.brown@lifeomic.com',
     description='A simple script to convert 23andMe raw data files to VCF format.',
