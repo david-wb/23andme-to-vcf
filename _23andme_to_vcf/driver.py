@@ -1,4 +1,18 @@
 import argparse
+
+REQUIRED_VCF_HEADER_COLUMNS = (
+    "CHROM",
+    "POS",
+    "ID",
+    "REF",
+    "ALT",
+    "QUAL",
+    "FILTER",
+    "INFO",
+    "FORMAT")
+OPTIONAL_VCF_HEADERS_COLUMNS = ("SAMPLE")
+VCF_HEADER_COLUMNS = REQUIRED_HEADER_COLUMNS + OPTIONAL_VCF_HEADER_COLUMNS
+
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input', help='A 23andme data file', required=True)
 parser.add_argument('--output', help='Output VCF file', required=True)
@@ -80,14 +94,14 @@ def load_23andme_data(input):
                     if not skip:
                         yield rsid, chrom, int(pos) - 1, genotype # subtract one because positions are 1-based indices
 
-def write_vcf_header(f):
+def write_vcf_header(f, vcf_header_columns=VCF_HEADER_COLUMNS):
     f.write(
 """##fileformat=VCFv4.2
 ##source=23andme_to_vcf
 ##reference=GRCh37
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT SAMPLE
-""")
+#{vcf_header_columns}
+""".format("\t".join(vcf_header_columns))
 
 def write_vcf(outfile, records):
     with open(outfile, 'w') as f:
