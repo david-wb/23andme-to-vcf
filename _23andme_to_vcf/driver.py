@@ -1,9 +1,11 @@
 import argparse
+
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input', help='A 23andme data file', required=True)
 parser.add_argument('--output', help='Output VCF file', required=True)
 parser.add_argument('--fasta', help='An uncompressed reference genome GRCh37 fasta file', required=True)
 parser.add_argument('--fai', help='The fasta index for for the reference', required=True)
+
 
 def load_fai(args):
     index = {}
@@ -19,6 +21,7 @@ def load_fai(args):
             linewidth = int(toks[4])
             index[chrom] = (start, length, linebases, linewidth)
     return index
+
 
 def get_vcf_records(pos_list, fai, args):
     with open(args.fasta) as f:
@@ -40,7 +43,7 @@ def get_vcf_records(pos_list, fai, args):
             return [genotype[0], genotype[1]]
 
         for (rsid, chrom, pos, genotype) in pos_list:
-            start, _, linebases, linewidth = fai[chrom]
+            start, _, linebases, linewidth = fai['chr' + chrom]
             n_lines = int(pos / linebases)
             n_bases = pos % linebases
             n_bytes = start + n_lines * linewidth + n_bases
@@ -60,8 +63,9 @@ def get_vcf_records(pos_list, fai, args):
                         yield (chrom, pos, rsid, ref, alts[1], '.', '.', '.', 'GT', '2/1')
                 elif len(alts) == 1:
                     yield (chrom, pos, rsid, ref, alts[0], '.', '.', '.', 'GT', '0/1')
-            elif len(alts) == 1: 
+            elif len(alts) == 1:
                 yield (chrom, pos, rsid, ref, alts[0], '.', '.', '.', 'GT', '1')
+
 
 def load_23andme_data(input):
     with open(input) as f:
@@ -78,22 +82,25 @@ def load_23andme_data(input):
                         if x not in 'ACTG':
                             skip = True
                     if not skip:
-                        yield rsid, chrom, int(pos) - 1, genotype # subtract one because positions are 1-based indices
+                        yield rsid, chrom, int(pos) - 1, genotype  # subtract one because positions are 1-based indices
+
 
 def write_vcf_header(f):
     f.write(
-"""##fileformat=VCFv4.2
-##source=23andme_to_vcf
-##reference=GRCh37
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT SAMPLE
-""")
+        """##fileformat=VCFv4.2
+        ##source=23andme_to_vcf
+        ##reference=GRCh37
+        ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+        #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT SAMPLE
+        """)
+
 
 def write_vcf(outfile, records):
     with open(outfile, 'w') as f:
         write_vcf_header(f)
         for record in records:
             f.write('\t'.join(record) + '\n')
+
 
 def main():
     args = parser.parse_args()
