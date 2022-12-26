@@ -10,8 +10,8 @@ REQUIRED_VCF_HEADER_COLUMNS = (
     "FILTER",
     "INFO",
     "FORMAT")
-OPTIONAL_VCF_HEADERS_COLUMNS = ("SAMPLE")
-VCF_HEADER_COLUMNS = REQUIRED_HEADER_COLUMNS + OPTIONAL_VCF_HEADER_COLUMNS
+OPTIONAL_VCF_HEADER_COLUMNS = ("SAMPLE", )
+VCF_HEADER_COLUMNS = REQUIRED_VCF_HEADER_COLUMNS + OPTIONAL_VCF_HEADER_COLUMNS
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input', help='A 23andme data file', required=True)
@@ -24,7 +24,10 @@ def load_fai(args):
     with open(args.fai) as f:
         for line in f:
             toks = line.split('\t')
-            chrom = 'chr' + toks[0]
+            if toks[0].startswith("chr"):
+                chrom = toks[0]
+            else:
+                chrom = 'chr' + toks[0]
             if chrom == 'chrMT':
                 chrom = 'chrM'
             length = int(toks[1])
@@ -101,7 +104,7 @@ def write_vcf_header(f, vcf_header_columns=VCF_HEADER_COLUMNS):
 ##reference=GRCh37
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #{vcf_header_columns}
-""".format("\t".join(vcf_header_columns))
+""".format(vcf_header_columns = "\t".join(vcf_header_columns)))
 
 def write_vcf(outfile, records):
     with open(outfile, 'w') as f:
